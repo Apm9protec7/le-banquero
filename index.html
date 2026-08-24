@@ -3,100 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Le Banquero - Jeu de Cartes</title>
+    <title>Le Banquero - Casino Royal</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #113f17;
+            background: radial-gradient(circle, #1a4d2e 0%, #0d2818 100%);
             color: #fff;
             text-align: center;
             margin: 0;
             padding: 20px;
+            min-height: 100vh;
         }
-        h1 { color: #f1c40f; margin-bottom: 5px; }
-        .subtitle { font-style: italic; color: #bdc3c7; margin-bottom: 20px; }
+        h1 { color: #f1c40f; margin-bottom: 5px; text-shadow: 0 2px 4px rgba(0,0,0,0.6); font-size: 2.5em; }
+        .subtitle { font-style: italic; color: #bdc3c7; margin-bottom: 20px; font-size: 1.1em; }
+        
         .game-container {
-            max-width: 700px;
+            max-width: 800px;
             margin: 0 auto;
-            background: #1e7e34;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+            background: rgba(15, 50, 25, 0.85);
+            border: 4px solid #b7950b;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.7);
         }
+        
         .stats {
             display: flex;
             justify-content: space-around;
-            background: #145a32;
-            padding: 12px;
-            border-radius: 8px;
+            background: #11381f;
+            border: 2px solid #d4ac0d;
+            padding: 15px;
+            border-radius: 10px;
             margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+        }
+        .stats span { color: #f1c40f; }
+
+        .dealer-table, .players-table {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px dashed #27ae60;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
             font-size: 1.1em;
             font-weight: bold;
+            margin-bottom: 12px;
+            color: #f1c40f;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
-        .banker-section, .players-section {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
+
         .table-cards {
             display: flex;
             justify-content: center;
-            gap: 15px;
-            margin-top: 10px;
+            gap: 20px;
             flex-wrap: wrap;
         }
-        .card-box {
-            text-align: center;
+
+        .player-seat {
+            background: rgba(20, 40, 25, 0.7);
+            border: 1px solid #2ecc71;
+            padding: 12px;
+            border-radius: 10px;
+            min-width: 120px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
         }
+        .player-seat:hover { transform: translateY(-3px); }
+
         .card-name {
-            font-size: 0.9em;
-            margin-bottom: 5px;
-            color: #f1c40f;
+            font-size: 0.95em;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #ecf0f1;
         }
+
         .card {
-            background: white;
-            color: #333;
-            width: 65px;
-            height: 95px;
-            border-radius: 6px;
+            background: #ffffff;
+            color: #2c3e50;
+            width: 70px;
+            height: 100px;
+            border-radius: 8px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 6px;
+            padding: 8px;
             font-weight: bold;
-            font-size: 1.1em;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            font-size: 1.2em;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4);
             margin: 0 auto;
+            animation: flipIn 0.5s ease-in-out;
         }
-        .card.red { color: #e74c3c; }
+        .card.red { color: #c0392b; }
+
+        @keyframes flipIn {
+            0% { transform: rotateY(90deg) scale(0.8); opacity: 0; }
+            100% { transform: rotateY(0deg) scale(1); opacity: 1; }
+        }
+
+        .action-area {
+            margin: 25px 0;
+        }
+
         button {
-            background-color: #e67e22;
+            background: linear-gradient(to bottom, #f39c12, #d35400);
             color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 1.1em;
+            border: 2px solid #f1c40f;
+            padding: 14px 30px;
+            font-size: 1.2em;
             font-weight: bold;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background 0.2s;
-            margin: 10px 5px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            transition: all 0.2s;
         }
-        button:hover { background-color: #d35400; }
-        button:disabled { background-color: #95a5a6; cursor: not-allowed; }
+        button:hover { 
+            background: linear-gradient(to bottom, #f1c40f, #e67e22);
+            transform: scale(1.05);
+        }
+        button:active { transform: scale(0.98); }
+        button:disabled { background: #7f8c8d; border-color: #95a5a6; cursor: not-allowed; transform: none; }
+
         #results-log {
             text-align: left;
-            background: #2c3e50;
-            padding: 10px 15px;
-            border-radius: 6px;
-            font-size: 0.95em;
-            max-height: 120px;
+            background: #112618;
+            border: 1px solid #27ae60;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1em;
+            max-height: 140px;
             overflow-y: auto;
-            margin-top: 15px;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
         }
+
         footer {
             margin-top: 30px;
-            font-size: 0.8em;
+            font-size: 0.85em;
             color: #bdc3c7;
         }
         footer a { color: #f1c40f; text-decoration: none; }
@@ -105,41 +152,41 @@
 <body>
 
     <h1>Le Banquero</h1>
-    <div class="subtitle">Battez la banque avec la carte la plus haute !</div>
+    <div class="subtitle">Affondez le Croupier et empochez les jetons !</div>
 
     <div class="game-container">
         <div class="stats">
-            <div>Vos Jetons : <span id="chips">150</span></div>
-            <div>Mise par manche : <span id="bet">10</span></div>
+            <div>Vos Jetons : <span id="chips">150</span> 🪙</div>
+            <div>Mise : <span id="bet">10</span> 🪙</div>
         </div>
 
-        <!-- Zone du Banquier -->
-        <div class="banker-section">
-            <div class="card-name">LE BANQUIER</div>
+        <!-- Section du Croupier / Banquier -->
+        <div class="dealer-table">
+            <div class="section-title">🎩 Le Croupier (Banque)</div>
             <div class="table-cards" id="banker-card-container">
-                <span style="color: #bdc3c7; font-style: italic;">En attente de la manche...</span>
+                <span style="color: #95a5a6; font-style: italic;">Le croupier attend vos ordres pour distribuer...</span>
             </div>
         </div>
 
-        <!-- Zone des Joueurs -->
-        <div class="players-section">
-            <div class="card-name">LES JOUEURS À TABLE</div>
+        <!-- Section des Joueurs Virtuels -->
+        <div class="players-table">
+            <div class="section-title">👥 La Table de Jeu (Personnages Virtuels)</div>
             <div class="table-cards" id="players-cards-container">
-                <span style="color: #bdc3c7; font-style: italic;">En attente de la manche...</span>
+                <span style="color: #95a5a6; font-style: italic;">La partie n'a pas encore commencé.</span>
             </div>
         </div>
 
-        <div>
-            <button id="deal-btn" onclick="playRound()">Distribuer les cartes</button>
-            <button id="reset-btn" onclick="resetGame()" style="display:none;">Recommencer</button>
+        <div class="action-area">
+            <button id="deal-btn" onclick="playRound()">Lancer la distribution</button>
+            <button id="reset-btn" onclick="resetGame()" style="display:none;">Recommencer une partie</button>
         </div>
 
-        <div id="results-log">Historique des manches : Prêt à jouer.</div>
+        <div id="results-log"><b>Historique de la table :</b> Prêt à jouer !</div>
     </div>
 
     <footer>
-        <p>Le Banquero est un jeu gratuit de divertissement sans argent réel. <br>
-        <a href="#mentions-legales">Mentions Légales : Jeu 100% gratuit et sans obligation d'achat.</a></p>
+        <p>Le Banquero - Jeu de divertissement 100% gratuit sans argent réel.<br>
+        <a href="#">Règles : Obtenez une carte plus haute que le banquier pour gagner vos jetons !</a></p>
     </footer>
 
     <script>
@@ -163,7 +210,7 @@
             return `
                 <div class="card ${cardObj.isRed ? 'red' : ''}">
                     <div>${cardObj.name}</div>
-                    <div style="text-align:center; font-size: 1.4em;">${cardObj.suit}</div>
+                    <div style="text-align:center; font-size: 1.5em; margin: auto 0;">${cardObj.suit}</div>
                     <div style="text-align:right;">${cardObj.name}</div>
                 </div>
             `;
@@ -171,7 +218,7 @@
 
         function playRound() {
             if (chips < bet) {
-                document.getElementById('results-log').innerHTML = "<b>Vous n'avez plus assez de jetons pour miser ! Game Over.</b>";
+                document.getElementById('results-log').innerHTML = "<b style='color:#e74c3c;'>Vous n'avez plus de jetons ! La banque vous a tout pris.</b>";
                 document.getElementById('deal-btn').style.display = 'none';
                 document.getElementById('reset-btn').style.display = 'inline-block';
                 return;
@@ -179,49 +226,53 @@
 
             chips -= bet;
 
+            // Le banquier tire sa carte
             const bankerCard = getRandomCard();
             document.getElementById('banker-card-container').innerHTML = `
-                <div class="card-box">
+                <div class="player-seat" style="border-color: #f1c40f;">
+                    <div class="card-name">Croupier</div>
                     ${renderCardHTML(bankerCard)}
-                    <div style="margin-top:5px; font-weight:bold;">Banque (${bankerCard.name})</div>
+                    <div style="margin-top:8px; font-size:0.9em; color:#f1c40f;">Carte : ${bankerCard.name}</div>
                 </div>
             `;
 
+            // Participants virtuels et utilisateur
             const participants = [
-                { name: "Vous", isUser: true, card: getRandomCard() },
-                { name: "Alice", isUser: false, card: getRandomCard() },
-                { name: "Bob", isUser: false, card: getRandomCard() }
+                { name: "Vous (Joueur)", isUser: true, card: getRandomCard(), avatar: "🤠" },
+                { name: "Alice (Experte)", isUser: false, card: getRandomCard(), avatar: "👩‍🦰" },
+                { name: "Bob (Téméraire)", isUser: false, card: getRandomCard(), avatar: "🧔" }
             ];
 
             let playersHTML = "";
-            let roundLog = `<b>Manche jouée (Banquier : ${bankerCard.name} ${bankerCard.suit})</b><br>`;
+            let roundLog = `<b>Manche jouée (Croupier dévoile : ${bankerCard.name} ${bankerCard.suit})</b><br>`;
 
             participants.forEach(p => {
                 let statusText = "";
                 let cardHtml = renderCardHTML(p.card);
 
                 if (p.card.strength > bankerCard.strength) {
-                    statusText = "<span style='color:#2ecc71; font-weight:bold;'>Gagne (+10)</span>";
+                    statusText = "<span style='color:#2ecc71; font-weight:bold;'>Victoire (+10 🪙)</span>";
                     if (p.isUser) {
-                        chips += bet * 2;
+                        chips += bet * 2; // Récupère sa mise + gain
                     }
                 } else if (p.card.strength < bankerCard.strength) {
-                    statusText = "<span style='color:#e74c3c;'>Perd</span>";
+                    statusText = "<span style='color:#e74c3c; font-weight:bold;'>Défaite (Mise perdue)</span>";
                 } else {
-                    statusText = "<span style='color:#f1c40f;'>Égalité (Remboursé)</span>";
+                    statusText = "<span style='color:#f1c40f; font-weight:bold;'>Égalité (Remboursé)</span>";
                     if (p.isUser) {
-                        chips += bet;
+                        chips += bet; // Remboursement de la mise
                     }
                 }
 
                 playersHTML += `
-                    <div class="card-box">
+                    <div class="player-seat">
+                        <div class="card-name">${p.avatar} ${p.name}</div>
                         ${cardHtml}
-                        <div style="margin-top:5px;">${p.name} (${p.card.name})<br>${statusText}</div>
+                        <div style="margin-top:8px; font-size:0.85em;">${p.card.name}<br>${statusText}</div>
                     </div>
                 `;
 
-                roundLog += `- ${p.name} tire un ${p.card.name} ${p.card.suit} -> ${statusText}<br>`;
+                roundLog += `- ${p.name} tire ${p.card.name} ${p.card.suit} ➔ ${statusText}<br>`;
             });
 
             document.getElementById('players-cards-container').innerHTML = playersHTML;
@@ -229,7 +280,7 @@
             document.getElementById('results-log').innerHTML = roundLog;
 
             if (chips <= 0) {
-                document.getElementById('results-log').innerHTML += "<br><b style='color:#e74c3c;'>Vous êtes ruiné ! Fin de partie.</b>";
+                document.getElementById('results-log').innerHTML += "<br><b style='color:#e74c3c;'>Banqueroute totale ! Fin de partie.</b>";
                 document.getElementById('deal-btn').style.display = 'none';
                 document.getElementById('reset-btn').style.display = 'inline-block';
             }
@@ -238,9 +289,9 @@
         function resetGame() {
             chips = 150;
             document.getElementById('chips').innerText = chips;
-            document.getElementById('results-log').innerHTML = "Historique des manches : Prêt à jouer.";
-            document.getElementById('banker-card-container').innerHTML = '<span style="color: #bdc3c7; font-style: italic;">En attente de la manche...</span>';
-            document.getElementById('players-cards-container').innerHTML = '<span style="color: #bdc3c7; font-style: italic;">En attente de la manche...</span>';
+            document.getElementById('results-log').innerHTML = "<b>Historique de la table :</b> Prêt à jouer !";
+            document.getElementById('banker-card-container').innerHTML = '<span style="color: #95a5a6; font-style: italic;">Le croupier attend vos ordres pour distribuer...</span>';
+            document.getElementById('players-cards-container').innerHTML = '<span style="color: #95a5a6; font-style: italic;">La partie n\'a pas encore commencé.</span>';
             document.getElementById('deal-btn').style.display = 'inline-block';
             document.getElementById('reset-btn').style.display = 'none';
         }
