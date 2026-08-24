@@ -16,7 +16,7 @@
         h1 { color: #f1c40f; margin-bottom: 5px; }
         .subtitle { font-style: italic; color: #bdc3c7; margin-bottom: 20px; }
         .game-container {
-            max-width: 700px;
+            max-width: 750px;
             margin: 0 auto;
             background: #1e7e34;
             padding: 20px;
@@ -48,22 +48,47 @@
         }
         .card-box {
             text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            min-width: 110px;
         }
         .card-name {
             font-size: 0.9em;
             margin-bottom: 5px;
             color: #f1c40f;
         }
+        .name-input {
+            background: #113f17;
+            border: 1px solid #f1c40f;
+            color: #fff;
+            font-weight: bold;
+            text-align: center;
+            padding: 4px;
+            border-radius: 4px;
+            width: 95px;
+            margin-bottom: 6px;
+            font-size: 0.9em;
+        }
+        .name-input:focus {
+            background: #fff;
+            color: #333;
+            outline: none;
+        }
+        .avatar-img {
+            font-size: 1.5em;
+            margin-bottom: 2px;
+        }
         .card {
             background: white;
             color: #333;
-            width: 65px;
-            height: 95px;
+            width: 60px;
+            height: 90px;
             border-radius: 6px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 6px;
+            padding: 5px;
             font-weight: bold;
             font-size: 1.1em;
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
@@ -121,9 +146,23 @@
         </div>
 
         <div class="players-section">
-            <div class="card-name">LES JOUEURS À TABLE</div>
+            <div class="card-name">LES JOUEURS À TABLE (Modifiez les prénoms de vos invités)</div>
             <div class="table-cards" id="players-cards-container">
-                <span style="color: #bdc3c7; font-style: italic;">En attente de la manche...</span>
+                <div class="card-box">
+                    <div class="avatar-img">🎩</div>
+                    <input type="text" class="name-input" id="p0-name" value="Vous">
+                    <div id="p0-card-slot"><span style="color: #bdc3c7; font-size: 0.85em;">En attente...</span></div>
+                </div>
+                <div class="card-box">
+                    <div class="avatar-img">👩‍🦰</div>
+                    <input type="text" class="name-input" id="p1-name" value="Alice">
+                    <div id="p1-card-slot"><span style="color: #bdc3c7; font-size: 0.85em;">En attente...</span></div>
+                </div>
+                <div class="card-box">
+                    <div class="avatar-img">🧔</div>
+                    <input type="text" class="name-input" id="p2-name" value="Bob">
+                    <div id="p2-card-slot"><span style="color: #bdc3c7; font-size: 0.85em;">En attente...</span></div>
+                </div>
             </div>
         </div>
 
@@ -132,7 +171,7 @@
             <button id="reset-btn" onclick="resetGame()" style="display:none;">Recommencer</button>
         </div>
 
-        <div id="results-log">Historique des manches : Prêt à jouer.</div>
+        <div id="results-log">Historique des manches : Prêt à jouer. Modifiez les prénoms des joueurs et lancez la distribution !</div>
     </div>
 
     <footer>
@@ -161,7 +200,7 @@
             return `
                 <div class="card ${cardObj.isRed ? 'red' : ''}">
                     <div>${cardObj.name}</div>
-                    <div style="text-align:center; font-size: 1.4em;">${cardObj.suit}</div>
+                    <div style="text-align:center; font-size: 1.3em;">${cardObj.suit}</div>
                     <div style="text-align:right;">${cardObj.name}</div>
                 </div>
             `;
@@ -177,24 +216,27 @@
 
             chips -= bet;
 
+            const name0 = document.getElementById('p0-name').value || "Joueur 1";
+            const name1 = document.getElementById('p1-name').value || "Joueur 2";
+            const name2 = document.getElementById('p2-name').value || "Joueur 3";
+
             const bankerCard = getRandomCard();
             document.getElementById('banker-card-container').innerHTML = `
-                <div class="card-box">
+                <div class="card-box" style="margin: 0 auto;">
                     ${renderCardHTML(bankerCard)}
                     <div style="margin-top:5px; font-weight:bold;">Banque (${bankerCard.name})</div>
                 </div>
             `;
 
             const participants = [
-                { name: "Vous", isUser: true, card: getRandomCard() },
-                { name: "Alice", isUser: false, card: getRandomCard() },
-                { name: "Bob", isUser: false, card: getRandomCard() }
+                { name: name0, isUser: true, card: getRandomCard() },
+                { name: name1, isUser: false, card: getRandomCard() },
+                { name: name2, isUser: false, card: getRandomCard() }
             ];
 
-            let playersHTML = "";
             let roundLog = `<b>Manche jouée (Banquier : ${bankerCard.name} ${bankerCard.suit})</b><br>`;
 
-            participants.forEach(p => {
+            participants.forEach((p, index) => {
                 let statusText = "";
                 let cardHtml = renderCardHTML(p.card);
 
@@ -212,17 +254,14 @@
                     }
                 }
 
-                playersHTML += `
-                    <div class="card-box">
-                        ${cardHtml}
-                        <div style="margin-top:5px;">${p.name} (${p.card.name})<br>${statusText}</div>
-                    </div>
+                document.getElementById(`p${index}-card-slot`).innerHTML = `
+                    ${cardHtml}
+                    <div style="margin-top:5px; font-size:0.85em;">(${p.card.name})<br>${statusText}</div>
                 `;
 
                 roundLog += `- ${p.name} tire un ${p.card.name} ${p.card.suit} -> ${statusText}<br>`;
             });
 
-            document.getElementById('players-cards-container').innerHTML = playersHTML;
             document.getElementById('chips').innerText = chips;
             document.getElementById('results-log').innerHTML = roundLog;
 
@@ -238,7 +277,11 @@
             document.getElementById('chips').innerText = chips;
             document.getElementById('results-log').innerHTML = "Historique des manches : Prêt à jouer.";
             document.getElementById('banker-card-container').innerHTML = '<span style="color: #bdc3c7; font-style: italic;">En attente de la manche...</span>';
-            document.getElementById('players-cards-container').innerHTML = '<span style="color: #bdc3c7; font-style: italic;">En attente de la manche...</span>';
+            
+            for(let i=0; i<3; i++) {
+                document.getElementById(`p${i}-card-slot`).innerHTML = '<span style="color: #bdc3c7; font-size: 0.85em;">En attente...</span>';
+            }
+
             document.getElementById('deal-btn').style.display = 'inline-block';
             document.getElementById('reset-btn').style.display = 'none';
         }
