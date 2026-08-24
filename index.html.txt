@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Banquero - Jeu de Cartes</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #113f17;
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 { color: #f1c40f; margin-bottom: 5px; }
+        .subtitle { font-style: italic; color: #bdc3c7; margin-bottom: 20px; }
+        .game-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: #1e7e34;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: #145a32;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .banker-section, .players-section {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .table-cards {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .card-box {
+            text-align: center;
+        }
+        .card-name {
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            color: #f1c40f;
+        }
+        .card {
+            background: white;
+            color: #333;
+            width: 65px;
+            height: 95px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 6px;
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            margin: 0 auto;
+        }
+        .card.red { color: #e74c3c; }
+        button {
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin: 10px 5px;
+        }
+        button:hover { background-color: #d35400; }
+        button:disabled { background-color: #95a5a6; cursor: not-allowed; }
+        #results-log {
+            text-align: left;
+            background: #2c3e50;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 0.95em;
+            max-height: 120px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+        footer {
+            margin-top: 30px;
+            font-size: 0.8em;
+            color: #bdc3c7;
+        }
+        footer a { color: #f1c40f; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <h1>Le Banquero</h1>
+    <div class="subtitle">Battez la banque avec la carte la plus haute !</div>
+
+    <div class="game-container">
+        <div class="stats">
+            <div>Vos Jetons : <span id="chips">150</span></div>
+            <div>Mise par manche : <span id="bet">10</span></div>
+        </div>
+
+        <!-- Zone du Banquier -->
+        <div class="banker-section">
+            <div class="card-name">LE BANQUIER</div>
+            <div class="table-cards" id="banker-card-container">
+                <span style="color: #bdc3c7; font-style: italic;">En attente de la manche...</span>
+            </div>
+        </div>
+
+        <!-- Zone des Joueurs -->
+        <div class="players-section">
+            <div class="card-name">LES JOUEURS À TABLE</div>
+            <div class="table-cards" id="players-cards-container">
+                <span style="color: #bdc3c7; font-style: italic;">En attente de la manche...</span>
+            </div>
+        </div>
+
+        <div>
+            <button id="deal-btn" onclick="playRound()">Distribuer les cartes</button>
+            <button id="reset-btn" onclick="resetGame()" style="display:none;">Recommencer</button>
+        </div>
+
+        <div id="results-log">Historique des manches : Prêt à jouer.</div>
+    </div>
+
+    <footer>
+        <p>Le Banquero est un jeu gratuit de divertissement sans argent réel. <br>
+        <a href="#mentions-legales">Mentions Légales : Jeu 100% gratuit et sans obligation d'achat.</a></p>
+    </footer>
+
+    <script>
+        let chips = 150;
+        let bet = 10;
+        const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'Valet', 'Dame', 'Roi', 'As'];
+        const suits = ['♠', '♥', '♦', '♣'];
+
+        function getRandomCard() {
+            const valIndex = Math.floor(Math.random() * values.length);
+            const suit = suits[Math.floor(Math.random() * suits.length)];
+            return {
+                name: values[valIndex],
+                suit: suit,
+                strength: valIndex,
+                isRed: suit === '♥' || suit === '♦'
+            };
+        }
+
+        function renderCardHTML(cardObj) {
+            return `
+                <div class="card ${cardObj.isRed ? 'red' : ''}">
+                    <div>${cardObj.name}</div>
+                    <div style="text-align:center; font-size: 1.4em;">${cardObj.suit}</div>
+                    <div style="text-align:right;">${cardObj.name}</div>
+                </div>
+            `;
+        }
+
+        function playRound() {
+            if (chips < bet) {
+                document.getElementById('results-log').innerHTML = "<b>Vous n'avez plus assez de jetons pour miser ! Game Over.</b>";
+                document.getElementById('deal-btn').style.display = 'none';
+                document.getElementById('reset-btn').style.display = 'inline-block';
+                return;
+            }
+
+            chips -= bet;
+
+            const bankerCard = getRandomCard();
+            document.getElementById('banker-card-container').innerHTML = `
+                <div class="card-box">
+                    ${renderCardHTML(bankerCard)}
+                    <div style="margin-top:5px; font-weight:bold;">Banque (${bankerCard.name})</div>
+                </div>
+            `;
+
+            const participants = [
+                { name: "Vous", isUser: true, card: getRandomCard() },
+                { name: "Alice", isUser: false, card: getRandomCard() },
+                { name: "Bob", isUser: false, card: getRandomCard() }
+            ];
+
+            let playersHTML = "";
+            let roundLog = `<b>Manche jouée (Banquier : ${bankerCard.name} ${bankerCard.suit})</b><br>`;
+
+            participants.forEach(p => {
+                let statusText = "";
+                let cardHtml = renderCardHTML(p.card);
+
+                if (p.card.strength > bankerCard.strength) {
+                    statusText = "<span style='color:#2ecc71; font-weight:bold;'>Gagne (+10)</span>";
+                    if (p.isUser) {
+                        chips += bet * 2;
+                    }
+                } else if (p.card.strength < bankerCard.strength) {
+                    statusText = "<span style='color:#e74c3c;'>Perd</span>";
+                } else {
+                    statusText = "<span style='color:#f1c40f;'>Égalité (Remboursé)</span>";
+                    if (p.isUser) {
+                        chips += bet;
+                    }
+                }
+
+                playersHTML += `
+                    <div class="card-box">
+                        ${cardHtml}
+                        <div style="margin-top:5px;">${p.name} (${p.card.name})<br>${statusText}</div>
+                    </div>
+                `;
+
+                roundLog += `- ${p.name} tire un ${p.card.name} ${p.card.suit} -> ${statusText}<br>`;
+            });
+
+            document.getElementById('players-cards-container').innerHTML = playersHTML;
+            document.getElementById('chips').innerText = chips;
+            document.getElementById('results-log').innerHTML = roundLog;
+
+            if (chips <= 0) {
+                document.getElementById('results-log').innerHTML += "<br><b style='color:#e74c3c;'>Vous êtes ruiné ! Fin de partie.</b>";
+                document.getElementById('deal-btn').style.display = 'none';
+                document.getElementById('reset-btn').style.display = 'inline-block';
+            }
+        }
+
+        function resetGame() {
+            chips = 150;
+            document.getElementById('chips').innerText = chips;
+            document.getElementById('results-log').innerHTML = "Historique des manches : Prêt à jouer.";
+            document.getElementById('banker-card-container').innerHTML = '<span style="color: #bdc3c7; font-style: italic;">En attente de la manche...</span>';
+            document.getElementById('players-cards-container').innerHTML = '<span style="color: #bdc3c7; font-style: italic;">En attente de la manche...</span>';
+            document.getElementById('deal-btn').style.display = 'inline-block';
+            document.getElementById('reset-btn').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
